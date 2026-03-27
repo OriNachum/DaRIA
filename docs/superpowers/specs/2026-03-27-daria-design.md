@@ -103,7 +103,7 @@ The model chooses to act based on system prompt directives and supervisor nudges
 
 The OpenCode supervisor evaluates DaRIA's activity and nudges it when needed ("you haven't patrolled in 30min", "you made a decision without journaling it").
 
-**Mechanism:** System prompt directives + supervisor evaluation. No new server-side code.
+**Mechanism:** System prompt directives + supervisor evaluation. No new server-side code. The supervisor model is configured independently from the agent model (e.g., a different Nemotron variant or external model for evaluation).
 
 ### Layer 2: Coded Logging (code-driven)
 
@@ -122,7 +122,7 @@ Automatic hooks in DaRIA's customized OpenCode daemon that capture everything, i
 2. `_handle_ipc()` — logs every tool call (skill, args, result)
 3. `on_message()` callback — logs every model output (text, destinations)
 
-**Storage:** Append-only JSONL files, one per day, rotated at midnight. Stored in DaRIA's working directory. This is the primary input for the phase 2 fine-tuning pipeline.
+**Storage:** Append-only JSONL files, one per day, rotated at midnight. Stored in DaRIA's working directory. This is the primary input for the phase 2 fine-tuning pipeline. The exact JSONL schema will be defined during implementation and documented in `docs/logging.md` — since these logs feed the pipeline, the schema should be treated as a contract once established.
 
 ## Project Structure
 
@@ -178,7 +178,7 @@ daria/
     └── default.html              # Site template (same style as Assimilai/AgentIRC)
 ```
 
-**From AgentIRC (assimilai pattern):** agent_runner.py, irc_transport.py, message_buffer.py, socket_server.py, ipc.py, webhook.py — copied from `packages/agent-harness/`, owned by DaRIA.
+**From AgentIRC (assimilai pattern):** agent_runner.py, irc_transport.py, message_buffer.py, socket_server.py, ipc.py, webhook.py — copied from AgentIRC's OpenCode backend (`agentirc/clients/opencode/`), owned by DaRIA. The generic template at `packages/agent-harness/` serves as reference; the OpenCode-specific implementations are the actual source.
 
 **Adapted:** daemon.py (logging hooks), supervisor.py (DaRIA-specific eval prompts), SKILL.md (DaRIA tools).
 
