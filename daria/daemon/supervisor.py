@@ -53,7 +53,7 @@ class OpenCodeSupervisor:
         escalation_threshold: int = 3,
         on_whisper: Callable[[str, str], Awaitable[None]] | None = None,
         on_escalation: Callable[[str], Awaitable[None]] | None = None,
-    ):
+    ) -> None:
         self.model = model
         self.window_size = window_size
         self.eval_interval = eval_interval

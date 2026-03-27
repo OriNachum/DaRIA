@@ -16,7 +16,10 @@ def decode_message(line: bytes) -> dict[str, Any] | None:
     stripped = line.strip()
     if not stripped:
         return None
-    return json.loads(stripped)
+    try:
+        return json.loads(stripped)
+    except json.JSONDecodeError:
+        return None
 
 
 def make_request(msg_type: str, **kwargs: Any) -> dict[str, Any]:
