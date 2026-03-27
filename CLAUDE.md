@@ -23,3 +23,16 @@ New code unique to DaRIA:
 - Type hints on all public functions
 - Tests use real instances, no mocks (following AgentIRC convention)
 - Commits follow conventional style: feat/fix/docs/refactor
+
+## PR Workflow
+
+Every task gets its own branch and PR. Before merging any PR:
+
+1. **Wait for all reviewer comments** (Qodo, Copilot, human reviewers)
+2. **Fix** valid issues found by reviewers — commit the fix to the same branch
+3. **Pushback** on invalid or non-applicable findings — reply with reasoning
+4. **Reply** to every comment thread, confirming fix or explaining pushback
+5. **Resolve** all comment threads
+6. **Merge** only after all threads are resolved
+
+Never merge a PR with unaddressed review comments.
