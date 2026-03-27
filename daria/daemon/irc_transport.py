@@ -61,7 +61,8 @@ class IRCTransport:
         self.connected = False
 
     async def send_privmsg(self, target: str, text: str) -> None:
-        await self._send_raw(f"PRIVMSG {target} :{text}")
+        safe_text = text.replace("\r", " ").replace("\n", " ")
+        await self._send_raw(f"PRIVMSG {target} :{safe_text}")
 
     async def join_channel(self, channel: str) -> None:
         await self._send_raw(f"JOIN {channel}")
@@ -137,7 +138,10 @@ class IRCTransport:
             else:
                 self.buffer.add(f"DM:{sender}", sender, text)
             if self.on_mention and f"@{self.nick}" in text:
-                self.on_mention(target, sender, text)
+                try:
+                    self.on_mention(target, sender, text)
+                except Exception:
+                    logger.exception("on_mention callback failed")
         elif msg.command == "NOTICE" and len(msg.params) >= 2:
             target = msg.params[0]
             text = msg.params[1]

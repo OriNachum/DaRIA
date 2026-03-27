@@ -108,7 +108,7 @@ class OpenCodeSupervisor:
                 proc.communicate(prompt.encode()),
                 timeout=30,
             )
-            verdict = SupervisorVerdict.parse(stdout.decode())
+            verdict = SupervisorVerdict.parse(stdout.decode(errors="replace"))
         except asyncio.TimeoutError:
             logger.warning("OpenCode supervisor timed out, killing process")
             if proc:
