@@ -5,7 +5,6 @@ to look up documentation, read GitHub issues, and research topics.
 """
 from __future__ import annotations
 
-import asyncio
 import json
 from urllib.parse import urlparse
 
@@ -53,11 +52,13 @@ async def fetch_page(url: str, timeout_ms: int = 15000) -> str:
     try:
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
-            page = await browser.new_page()
-            await page.goto(url, timeout=timeout_ms, wait_until="domcontentloaded")
-            title = await page.title()
-            text = await page.inner_text("body")
-            await browser.close()
-            return format_result(url=url, title=title, text=text, ok=True)
+            try:
+                page = await browser.new_page()
+                await page.goto(url, timeout=timeout_ms, wait_until="domcontentloaded")
+                title = await page.title()
+                text = await page.inner_text("body")
+                return format_result(url=url, title=title, text=text, ok=True)
+            finally:
+                await browser.close()
     except Exception as exc:
         return format_result(url=url, title="", text="", ok=False, error=str(exc))
