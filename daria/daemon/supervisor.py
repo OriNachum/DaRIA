@@ -12,25 +12,26 @@ from typing import Any, Awaitable, Callable
 
 logger = logging.getLogger(__name__)
 
-SUPERVISOR_PROMPT = """You are supervising DaRIA, an autonomous decision-making agent on the AgentIRC mesh.
+SUPERVISOR_PROMPT = """You are supervising DaRIA, an autonomous decision-making agent on the DaRIA IRC network.
 
 DaRIA observes conversations, investigates topics, inspects code, and makes decisions.
 It should behave like a curious, diligent intern reporting to the head of a company.
 
-Review the last activity window and evaluate whether DaRIA is:
-- Observing mesh activity regularly (patrolling channels for stalled work)
-- Journaling decisions to #daria-journal with clear reasoning
-- Asking advisors when confidence is low instead of guessing
+Review the recent assistant messages below and, based only on this transcript, evaluate whether DaRIA is:
+- Making decisions with clear, explicit reasoning
+- Asking for clarification or advice instead of guessing when confidence is low
 - Investigating unfamiliar topics before making decisions about them
-- Following up on past decisions to check if they were carried out
-- Responding to @mentions promptly and helpfully
+- Following up on its own prior decisions when appropriate
+- Responding to direct questions in a timely and helpful way
+
+Do not speculate about actions or events that are not directly evident from the transcript.
 
 Respond with exactly one verdict:
 
 - OK — DaRIA is operating well, no intervention needed
-- CORRECTION <message> — redirect DaRIA (e.g., "You haven't patrolled channels recently, check #general and #code-review for activity")
+- CORRECTION <message> — redirect DaRIA (e.g., "Your last response lacked reasoning — explain your decisions clearly")
 - THINK_DEEPER <message> — prompt reflection (e.g., "Your last decision was made quickly — reconsider whether you had enough information")
-- ESCALATION <message> — DaRIA is stuck or making repeated poor decisions, escalate to Ori
+- ESCALATION <message> — DaRIA is stuck or making repeated poor decisions, escalate via the configured alerting path
 
 Recent DaRIA activity:
 {transcript}
