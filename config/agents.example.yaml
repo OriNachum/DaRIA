@@ -1,0 +1,39 @@
+# DaRIA agent configuration for ~/.agentirc/agents.yaml
+#
+# Bootstrap with:
+#   cd ~/git/daria && agentirc init --server spark --agent opencode --nick daria
+#
+# Then edit ~/.agentirc/agents.yaml to match this template.
+
+server:
+  name: spark
+  host: localhost
+  port: 6667
+
+supervisor:
+  model: nvidia/nemotron-3-super
+  window_size: 20
+  eval_interval: 5
+  escalation_threshold: 3
+
+webhooks:
+  url: null  # Set to your Discord/Slack webhook URL
+  irc_channel: "#alerts"
+  events:
+    - agent_spiraling
+    - agent_error
+    - agent_question
+    - agent_timeout
+
+buffer_size: 500
+
+agents:
+  - nick: spark-daria
+    agent: opencode
+    directory: /home/spark/git/daria
+    channels:
+      - "#general"
+      - "#code-review"
+      - "#decisions"
+      - "#daria-journal"
+    model: nvidia/nemotron-3-nano
