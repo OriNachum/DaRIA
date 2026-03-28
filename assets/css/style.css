@@ -1,3 +1,6 @@
+/* DaRIA site theme — copied from Assimilai (https://github.com/OriNachum/assimilai)
+   Shared across the Organic Development ecosystem. Accent color #D97706. */
+
 /* Base */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
