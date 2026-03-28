@@ -61,7 +61,7 @@ Check every **1 minute** until comments appear:
 bash ~/.claude/skills/pr-review/scripts/pr-comments.sh <PR_NUMBER>
 ```
 
-If no inline comments found, wait 1 minute and check again. After 3 empty checks, assume reviewers are done.
+If no inline comments found, wait 1 minute and check again. Keep polling until all reviewers have posted (check PR review state), or 10 minutes have passed since PR creation.
 
 ### 6. Triage each comment
 
@@ -98,7 +98,7 @@ Sign replies with `- Claude`.
 
 ## Scripts
 
-The pr-review scripts are at `~/.claude/skills/pr-review/scripts/`:
+**Prerequisite:** The pr-review scripts must be installed at `~/.claude/skills/pr-review/scripts/` (user-level, shared across repos). These are provided by the global Claude skills setup, not this repo. If missing, the `gh api` commands in the scripts can be run directly.
 
 | Script | Purpose |
 |--------|---------|
