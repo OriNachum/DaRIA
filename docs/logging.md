@@ -17,7 +17,7 @@ Append-only JSONL (one JSON object per line). One file per UTC day, rotated at m
 
 **Location:** `<agent_directory>/logs/` (from `AgentConfig.directory`)
 
-Example: `/home/spark/git/daria/logs/daria-2026-03-27.jsonl`
+Example: `~/git/daria/logs/daria-2026-03-27.jsonl`
 
 ## Schema
 
