@@ -10,17 +10,31 @@ import json
 from pathlib import Path
 
 MAX_FILE_SIZE = 100_000
+SUBPROCESS_TIMEOUT = 60.0
 
 
 async def _run(cmd: list[str], cwd: str | None = None) -> tuple[int, str, str]:
     """Run a subprocess and return (returncode, stdout, stderr)."""
-    proc = await asyncio.create_subprocess_exec(
-        *cmd,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
-        cwd=cwd,
-    )
-    stdout, stderr = await proc.communicate()
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            *cmd,
+            stdin=asyncio.subprocess.DEVNULL,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+            cwd=cwd,
+        )
+    except (FileNotFoundError, OSError) as exc:
+        return 127, "", str(exc)
+    try:
+        stdout, stderr = await asyncio.wait_for(
+            proc.communicate(), timeout=SUBPROCESS_TIMEOUT,
+        )
+    except asyncio.TimeoutError:
+        try:
+            proc.kill()
+        except ProcessLookupError:
+            pass
+        return 124, "", f"Command timed out after {SUBPROCESS_TIMEOUT}s"
     return proc.returncode, stdout.decode(errors="replace"), stderr.decode(errors="replace")
 
 
@@ -73,7 +87,7 @@ async def git_diff(repo_path: str, ref: str = "HEAD") -> str:
 async def grep_files(pattern: str, path: str, glob: str = "*") -> str:
     """Search files for a pattern using grep."""
     rc, out, err = await _run(
-        ["grep", "-rn", "--include", glob, pattern, path],
+        ["grep", "-rn", "--include", glob, "--", pattern, path],
     )
     if rc not in (0, 1):
         return json.dumps({"ok": False, "error": err.strip() or "grep failed"})
