@@ -22,6 +22,7 @@ from daria.daemon.webhook import WebhookClient, AlertEvent
 from daria.daemon.agent_runner import OpenCodeAgentRunner
 from daria.daemon.supervisor import OpenCodeSupervisor
 from daria.daemon.pidfile import write_pid, remove_pid
+from daria.daemon.logger import DaRIALogger, LogEntry
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +57,7 @@ class OpenCodeDaemon:
         self._socket_server: SocketServer | None = None
         self._agent_runner: OpenCodeAgentRunner | None = None
         self._supervisor: OpenCodeSupervisor | None = None
+        self._logger: DaRIALogger | None = None
 
         # FIFO queue of relay targets — each @mention enqueues a target,
         # each agent response dequeues one, ensuring correct routing even
@@ -82,6 +84,11 @@ class OpenCodeDaemon:
 
         # 1. Message buffer
         self._buffer = MessageBuffer(max_per_channel=self.config.buffer_size)
+
+        # 1a. Structured JSONL logger
+        from pathlib import Path
+        log_dir = Path(self.agent.directory) / "logs"
+        self._logger = DaRIALogger(log_dir=log_dir)
 
         # 2. IRC transport (with @mention -> agent activation)
         self._transport = IRCTransport(
@@ -186,6 +193,16 @@ class OpenCodeDaemon:
                 prompt = f"[IRC @mention in {target}] <{sender}> {text}"
             else:
                 prompt = f"[IRC DM] <{sender}> {text}"
+            if self._logger:
+                try:
+                    self._logger.log(LogEntry.trigger(
+                        source="mention",
+                        sender=sender,
+                        channel=target if target.startswith("#") else f"DM:{sender}",
+                        text=text,
+                    ))
+                except Exception:
+                    logger.exception("Failed to log trigger")
             asyncio.create_task(self._agent_runner.send_prompt(prompt))
 
     async def _on_agent_message(self, msg: dict) -> None:
@@ -205,6 +222,18 @@ class OpenCodeDaemon:
                                 await self._transport.send_privmsg(
                                     relay_target, line
                                 )
+
+        if self._logger:
+            try:
+                destinations = [relay_target] if relay_target else []
+                full_text = "\n".join(
+                    block.get("text", "").strip()
+                    for block in msg.get("content", [])
+                    if block.get("type") == "text"
+                )
+                self._logger.log(LogEntry.response(text=full_text, destinations=destinations))
+            except Exception:
+                logger.exception("Failed to log response")
 
         if self._supervisor:
             await self._supervisor.observe(msg)
@@ -307,41 +336,61 @@ class OpenCodeDaemon:
 
         try:
             if msg_type == "irc_send":
-                return await self._ipc_irc_send(req_id, msg)
+                response = await self._ipc_irc_send(req_id, msg)
 
             elif msg_type == "irc_read":
-                return await self._ipc_irc_read(req_id, msg)
+                response = await self._ipc_irc_read(req_id, msg)
 
             elif msg_type == "irc_join":
-                return await self._ipc_irc_join(req_id, msg)
+                response = await self._ipc_irc_join(req_id, msg)
 
             elif msg_type == "irc_part":
-                return await self._ipc_irc_part(req_id, msg)
+                response = await self._ipc_irc_part(req_id, msg)
 
             elif msg_type == "irc_channels":
-                return await self._ipc_irc_channels(req_id)
+                response = await self._ipc_irc_channels(req_id)
 
             elif msg_type == "irc_who":
-                return await self._ipc_irc_who(req_id, msg)
+                response = await self._ipc_irc_who(req_id, msg)
 
             elif msg_type == "irc_ask":
-                return await self._ipc_irc_ask(req_id, msg)
+                response = await self._ipc_irc_ask(req_id, msg)
 
             elif msg_type == "compact":
-                return await self._ipc_compact(req_id)
+                response = await self._ipc_compact(req_id)
 
             elif msg_type == "clear":
-                return await self._ipc_clear(req_id)
+                response = await self._ipc_clear(req_id)
 
             elif msg_type == "shutdown":
                 asyncio.create_task(self._graceful_shutdown())
-                return make_response(req_id, ok=True)
+                response = make_response(req_id, ok=True)
 
             else:
-                return make_response(req_id, ok=False, error=f"Unknown message type: {msg_type!r}")
+                response = make_response(req_id, ok=False, error=f"Unknown message type: {msg_type!r}")
+
+            if self._logger and msg_type not in ("compact", "clear", "shutdown"):
+                try:
+                    self._logger.log(LogEntry.tool_call(
+                        skill=msg_type,
+                        args={k: v for k, v in msg.items() if k not in ("type", "id")},
+                        result={"ok": response.get("ok", False)},
+                    ))
+                except Exception:
+                    logger.exception("Failed to log tool call")
+            return response
 
         except Exception as exc:
             logger.exception("IPC handler error for type %r", msg_type)
+            if self._logger and msg_type not in ("compact", "clear", "shutdown"):
+                try:
+                    self._logger.log(LogEntry.tool_call(
+                        skill=msg_type,
+                        args={k: v for k, v in msg.items() if k not in ("type", "id")},
+                        result={"ok": False, "error": str(exc)},
+                    ))
+                except Exception:
+                    logger.exception("Failed to log failed tool call")
             return make_response(req_id, ok=False, error=str(exc))
 
     # ------------------------------------------------------------------
