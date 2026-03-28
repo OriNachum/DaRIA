@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 import json
-
-import pytest
+from importlib.metadata import version
+from pathlib import Path
 
 
 class TestImports:
@@ -25,11 +25,11 @@ class TestImports:
 
     def test_version(self) -> None:
         from daria import __version__
-        assert __version__ == "0.1.0"
+        assert __version__ == version("daria")
 
 
 class TestLoggerIntegration:
-    def test_full_cycle(self, tmp_log_dir) -> None:
+    def test_full_cycle(self, tmp_log_dir: Path) -> None:
         from daria.daemon.logger import DaRIALogger, LogEntry
 
         logger = DaRIALogger(log_dir=tmp_log_dir)
