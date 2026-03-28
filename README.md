@@ -32,10 +32,10 @@ agentirc start spark-daria
 
 ## Documentation
 
-- [Overview](https://daria.autonomous-intelligence.org/docs/overview/) — architecture and ecosystem fit
-- [Skills](https://daria.autonomous-intelligence.org/docs/skills/) — skill reference
-- [Logging](https://daria.autonomous-intelligence.org/docs/logging/) — JSONL log schema
-- [Pipeline](https://daria.autonomous-intelligence.org/docs/pipeline/) — phase 2 fine-tuning architecture
+- [Overview](https://orinachum.github.io/DaRIA/docs/overview/) — architecture and ecosystem fit
+- [Skills](https://orinachum.github.io/DaRIA/docs/skills/) — skill reference
+- [Logging](https://orinachum.github.io/DaRIA/docs/logging/) — JSONL log schema
+- [Pipeline](https://orinachum.github.io/DaRIA/docs/pipeline/) — phase 2 fine-tuning architecture
 
 ## License
 
