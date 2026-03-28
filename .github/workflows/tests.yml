@@ -17,6 +17,6 @@ jobs:
 
       - run: uv python install 3.12
 
-      - run: uv sync --extra dev
+      - run: uv sync --extra dev --frozen
 
       - run: uv run pytest -v
