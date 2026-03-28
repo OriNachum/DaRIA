@@ -59,7 +59,7 @@ Hook points:
 |------|-------------|
 | `_on_mention()` | Trigger — who, what, where |
 | `_handle_ipc()` | Every tool call — skill, args, result |
-| `on_message()` | Every model output — text, destinations |
+| `_on_agent_message()` | Every model output — text, destinations |
 
 Logs are written to append-only JSONL files, one per day. See [Logging](../logging/) for the schema. This data feeds the [Phase 2 pipeline](../pipeline/).
 

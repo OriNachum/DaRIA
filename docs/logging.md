@@ -11,13 +11,13 @@ DaRIA's coded logging layer captures every trigger, tool call, and model respons
 
 ## Format
 
-Append-only JSONL (one JSON object per line). One file per day, rotated at midnight.
+Append-only JSONL (one JSON object per line). One file per UTC day, rotated at midnight UTC.
 
 **File naming:** `daria-YYYY-MM-DD.jsonl`
 
-**Location:** `<working_directory>/logs/`
+**Location:** `<agent_directory>/logs/` (from `AgentConfig.directory`)
 
-Example: `~/git/daria/logs/daria-2026-03-27.jsonl`
+Example: `/home/spark/git/daria/logs/daria-2026-03-27.jsonl`
 
 ## Schema
 
@@ -50,11 +50,10 @@ Every skill invocation — arguments and result.
 {
   "kind": "tool_call",
   "data": {
-    "skill": "inspect",
+    "skill": "irc_read",
     "args": {
-      "prs": true,
-      "repo": "OriNachum/agentirc",
-      "state": "open"
+      "channel": "#general",
+      "limit": "50"
     },
     "result": {"ok": true}
   },
@@ -79,13 +78,13 @@ Every model output — the text and where it was sent.
 
 ## Hook Points
 
-The three entry kinds map directly to hook points in `daria/daemon/logger.py`:
+The three entry kinds map directly to hook points in `daria/daemon/daemon.py`:
 
 | Entry kind | Hook | Trigger |
 |------------|------|---------|
 | `trigger` | `_on_mention()` | Incoming mention or supervisor nudge |
 | `tool_call` | `_handle_ipc()` | Every skill invocation |
-| `response` | `on_message()` | Every model output |
+| `response` | `_on_agent_message()` | Every model output |
 
 ## Schema Contract
 
