@@ -194,12 +194,15 @@ class OpenCodeDaemon:
             else:
                 prompt = f"[IRC DM] <{sender}> {text}"
             if self._logger:
-                self._logger.log(LogEntry.trigger(
-                    source="mention",
-                    sender=sender,
-                    channel=target if target.startswith("#") else None,
-                    text=text,
-                ))
+                try:
+                    self._logger.log(LogEntry.trigger(
+                        source="mention",
+                        sender=sender,
+                        channel=target if target.startswith("#") else f"DM:{sender}",
+                        text=text,
+                    ))
+                except Exception:
+                    logger.exception("Failed to log trigger")
             asyncio.create_task(self._agent_runner.send_prompt(prompt))
 
     async def _on_agent_message(self, msg: dict) -> None:
@@ -221,13 +224,16 @@ class OpenCodeDaemon:
                                 )
 
         if self._logger:
-            destinations = [relay_target] if relay_target else []
-            full_text = "\n".join(
-                block.get("text", "").strip()
-                for block in msg.get("content", [])
-                if block.get("type") == "text"
-            )
-            self._logger.log(LogEntry.response(text=full_text, destinations=destinations))
+            try:
+                destinations = [relay_target] if relay_target else []
+                full_text = "\n".join(
+                    block.get("text", "").strip()
+                    for block in msg.get("content", [])
+                    if block.get("type") == "text"
+                )
+                self._logger.log(LogEntry.response(text=full_text, destinations=destinations))
+            except Exception:
+                logger.exception("Failed to log response")
 
         if self._supervisor:
             await self._supervisor.observe(msg)
@@ -364,15 +370,27 @@ class OpenCodeDaemon:
                 response = make_response(req_id, ok=False, error=f"Unknown message type: {msg_type!r}")
 
             if self._logger and msg_type not in ("compact", "clear", "shutdown"):
-                self._logger.log(LogEntry.tool_call(
-                    skill=msg_type,
-                    args={k: v for k, v in msg.items() if k not in ("type", "id")},
-                    result={"ok": response.get("ok", False)},
-                ))
+                try:
+                    self._logger.log(LogEntry.tool_call(
+                        skill=msg_type,
+                        args={k: v for k, v in msg.items() if k not in ("type", "id")},
+                        result={"ok": response.get("ok", False)},
+                    ))
+                except Exception:
+                    logger.exception("Failed to log tool call")
             return response
 
         except Exception as exc:
             logger.exception("IPC handler error for type %r", msg_type)
+            if self._logger and msg_type not in ("compact", "clear", "shutdown"):
+                try:
+                    self._logger.log(LogEntry.tool_call(
+                        skill=msg_type,
+                        args={k: v for k, v in msg.items() if k not in ("type", "id")},
+                        result={"ok": False, "error": str(exc)},
+                    ))
+                except Exception:
+                    logger.exception("Failed to log failed tool call")
             return make_response(req_id, ok=False, error=str(exc))
 
     # ------------------------------------------------------------------
