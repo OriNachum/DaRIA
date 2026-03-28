@@ -1,0 +1,33 @@
+title: DaRIA
+description: "Data Refinery Intelligent Agent — the awareness pillar of Organic Development"
+author: Ori Nachum
+url: "https://daria.autonomous-intelligence.org"
+baseurl: ""
+
+permalink: pretty
+
+markdown: kramdown
+highlighter: rouge
+
+kramdown:
+  toc_levels: 2..3
+
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+exclude:
+  - README.md
+  - LICENSE
+  - CLAUDE.md
+  - Gemfile.lock
+  - .claude/
+  - .superpowers/
+  - pyproject.toml
+  - uv.lock
+  - tests/
+  - daria/
+  - skills/
+  - config/
+  - docs/superpowers/
