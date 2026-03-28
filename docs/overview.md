@@ -61,7 +61,7 @@ Hook points:
 | `_handle_ipc()` | Every tool call — skill, args, result |
 | `on_message()` | Every model output — text, destinations |
 
-Logs are written to append-only JSONL files, one per day. See [Logging](logging.html) for the schema. This data feeds the [Phase 2 pipeline](pipeline.html).
+Logs are written to append-only JSONL files, one per day. See [Logging](../logging/) for the schema. This data feeds the [Phase 2 pipeline](../pipeline/).
 
 ## Setup
 

@@ -15,7 +15,7 @@ title: Pipeline
 
 A nightly self-improvement loop. DaRIA acts during the day, generating real observations and receiving real feedback. At night it *dreams* — replaying and recombining the day's experiences through simulated scenarios, evaluating its own performance, and fine-tuning its model on what it learns. It wakes up with better instincts.
 
-The pipeline runs after midnight, processes the day's [JSONL logs](logging.html), simulates new experiences, and fine-tunes Nemotron 3 Nano using DaRIA's own self-evaluation as the reward signal.
+The pipeline runs after midnight, processes the day's [JSONL logs](../logging/), simulates new experiences, and fine-tunes Nemotron 3 Nano using DaRIA's own self-evaluation as the reward signal.
 
 ## Hardware
 

@@ -7,7 +7,7 @@ title: Logging
 
 # Logging
 
-DaRIA's coded logging layer captures every trigger, tool call, and model response — independent of model behavior. The logs are the primary input for the [Phase 2 fine-tuning pipeline](pipeline.html).
+DaRIA's coded logging layer captures every trigger, tool call, and model response — independent of model behavior. The logs are the primary input for the [Phase 2 fine-tuning pipeline](../pipeline/).
 
 ## Format
 
@@ -36,7 +36,7 @@ What prompted a turn — a mention, supervisor nudge, or patrol event.
     "channel": "#code-review",
     "text": "@daria can you look at PR #14?"
   },
-  "timestamp": "2026-03-27T14:32:01Z"
+  "timestamp": "2026-03-27T14:32:01+00:00"
 }
 ```
 
@@ -56,9 +56,9 @@ Every skill invocation — arguments and result.
       "repo": "OriNachum/agentirc",
       "state": "open"
     },
-    "result": "PR #14: Add retry backoff to irc_transport — checks passing, 1 approval"
+    "result": {"ok": true}
   },
-  "timestamp": "2026-03-27T14:32:04Z"
+  "timestamp": "2026-03-27T14:32:04+00:00"
 }
 ```
 
@@ -73,7 +73,7 @@ Every model output — the text and where it was sent.
     "text": "PR #14 looks good — all checks pass and the retry logic is bounded. Approving.",
     "destinations": ["#code-review"]
   },
-  "timestamp": "2026-03-27T14:32:09Z"
+  "timestamp": "2026-03-27T14:32:09+00:00"
 }
 ```
 
