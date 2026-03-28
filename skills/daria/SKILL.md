@@ -13,10 +13,10 @@ These skills give DaRIA its capabilities on the AgentIRC mesh.
 
 ## Setup
 
-Set the `AGENTIRC_NICK` environment variable to your agent's nick (e.g. `spark-daria`).
+Set the `DARIA_NICK` environment variable to your agent's nick (e.g. `spark-daria`).
 The IRC tools resolve the socket path automatically:
 
-    $XDG_RUNTIME_DIR/agentirc-<nick>.sock   (falls back to /tmp/agentirc-<nick>.sock)
+    $XDG_RUNTIME_DIR/daria-<nick>.sock   (falls back to /tmp/daria-<nick>.sock)
 
 ## IRC Commands (observe, decide, ask, journal)
 
@@ -55,52 +55,28 @@ All IRC commands use `python3 -m daria.daemon.skill.irc_client`.
 Use Playwright to fetch and read web pages. For researching documentation,
 GitHub issues, Stack Overflow, and other resources.
 
-    python3 -c "
-    import asyncio, sys
-    from daria.skills.investigate import fetch_page
-    print(asyncio.run(fetch_page(sys.argv[1])))
-    " "https://docs.example.com/api"
+    python3 -c "import asyncio, sys; from daria.skills.investigate import fetch_page; print(asyncio.run(fetch_page(sys.argv[1])))" "https://docs.example.com/api"
 
 ## inspect — examine code and git history
 
 ### Read a file
 
-    python3 -c "
-    import asyncio, sys
-    from daria.skills.inspect import read_file
-    print(asyncio.run(read_file(sys.argv[1])))
-    " "path/to/file.py"
+    python3 -c "import asyncio, sys; from daria.skills.inspect import read_file; print(asyncio.run(read_file(sys.argv[1])))" "path/to/file.py"
 
 ### Git log
 
-    python3 -c "
-    import asyncio, sys
-    from daria.skills.inspect import git_log
-    print(asyncio.run(git_log(sys.argv[1], count=int(sys.argv[2]))))
-    " "/home/spark/git/agentirc" 10
+    python3 -c "import asyncio, sys; from daria.skills.inspect import git_log; print(asyncio.run(git_log(sys.argv[1], count=int(sys.argv[2]))))" "path/to/repo" 10
 
 ### Git diff
 
-    python3 -c "
-    import asyncio, sys
-    from daria.skills.inspect import git_diff
-    print(asyncio.run(git_diff(sys.argv[1])))
-    " "/home/spark/git/agentirc"
+    python3 -c "import asyncio, sys; from daria.skills.inspect import git_diff; print(asyncio.run(git_diff(sys.argv[1])))" "path/to/repo"
 
 ### Search files
 
-    python3 -c "
-    import asyncio, sys
-    from daria.skills.inspect import grep_files
-    print(asyncio.run(grep_files(sys.argv[1], sys.argv[2])))
-    " "pattern" "/home/spark/git/agentirc"
+    python3 -c "import asyncio, sys; from daria.skills.inspect import grep_files; print(asyncio.run(grep_files(sys.argv[1], sys.argv[2])))" "pattern" "path/to/search"
 
 ### List PRs
 
-    python3 -c "
-    import asyncio, sys
-    from daria.skills.inspect import list_prs
-    print(asyncio.run(list_prs(sys.argv[1])))
-    " "/home/spark/git/agentirc"
+    python3 -c "import asyncio, sys; from daria.skills.inspect import list_prs; print(asyncio.run(list_prs(sys.argv[1])))" "path/to/repo"
 
 All commands print JSON to stdout. Always check the `ok` field in the response.
